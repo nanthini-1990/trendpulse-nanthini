@@ -50,15 +50,11 @@ def assign_category(title):
 
     title = title.lower()
 
-    matched_categories = []
-
     for category, keywords in categories.items():
         for keyword in keywords:
             if keyword in title:
-                matched_categories.append(category)
-
-    # Return first match (priority-based)
-    return matched_categories[0] if matched_categories else None
+                return category
+    return None
 
 # Main function
 def main():
@@ -104,43 +100,12 @@ def main():
         # Sleep after each category
         time.sleep(2)
 
-    if len(collected_data) < 100:
-        print("\nFilling remaining stories to reach 100...")
-
-        for story_id in story_ids:
-            if len(collected_data) >= 100:
-                break
-
-            story = fetch_story(story_id)
-
-            if not story:
-                continue
-
-            title = story.get("title", "")
-
-            data = {
-                "post_id": story.get("id"),
-                "title": title,
-                "category": assign_category(title) or "technology",
-                "score": story.get("score", 0),
-                "num_comments": story.get("descendants", 0),
-                "author": story.get("by", "unknown"),
-                "collected_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            }
-
-            collected_data.append(data)
-
-    # Create data folder
-    if not os.path.exists("data"):
-        os.makedirs("data")
-
     # Create data folder
     if not os.path.exists("data"):
         os.makedirs("data")
 
     # File name
     file_name = f"data/trends_{datetime.now().strftime('%Y%m%d')}.json"
-
 
     # Save JSON
     with open(file_name, "w") as file:
@@ -153,4 +118,4 @@ def main():
 
 # Run script
 if __name__ == "__main__":
-    main()   
+    main()
