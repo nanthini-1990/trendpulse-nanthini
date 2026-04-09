@@ -1,30 +1,75 @@
+# task3_analysis.py
+
+# Import libraries
 import pandas as pd
+import numpy as np
+
+# Step 1: Load the CSV file
+file_path = "data/trends_clean.csv"
 
 try:
-    print("Loading cleaned data...")
-
-    df = pd.read_csv("cleaned_data.csv")
-
-    print("\nDataset Preview:")
-    print(df.head())
-
-    print("\n🔍 Basic Analysis:")
-
-    # Select only numeric columns
-    numeric_cols = df.select_dtypes(include=['int64', 'float64']).columns
-
-    print("\nNumeric Columns:", list(numeric_cols))
-
-    for col in numeric_cols:
-        print(f"\nAnalysis for {col}:")
-        print("Mean:", df[col].mean())
-        print("Max:", df[col].max())
-        print("Min:", df[col].min())
-
-    print("\n✅ Analysis completed successfully")
-
-except FileNotFoundError:
-    print("❌ cleaned_data.csv not found. Run Task 2 first.")
-
+    df = pd.read_csv(file_path)
+    print(f"Loaded data: {df.shape}")
 except Exception as e:
-    print("❌ Error occurred:", e)
+    print("Error loading file:", e)
+    exit()
+
+# Print first 5 rows
+print("\nFirst 5 rows:")
+print(df.head())
+
+# Print average values
+avg_score = df["score"].mean()
+avg_comments = df["num_comments"].mean()
+
+print(f"\nAverage score   : {avg_score:.2f}")
+print(f"Average comments: {avg_comments:.2f}")
+
+# -----------------------------
+# Step 2: NumPy Analysis
+# -----------------------------
+
+scores = df["score"].values  # Convert to NumPy array
+
+print("\n--- NumPy Stats ---")
+
+# Mean, Median, Std
+print(f"Mean score   : {np.mean(scores):.2f}")
+print(f"Median score : {np.median(scores):.2f}")
+print(f"Std deviation: {np.std(scores):.2f}")
+
+# Max and Min
+print(f"Max score    : {np.max(scores)}")
+print(f"Min score    : {np.min(scores)}")
+
+# Category with most stories
+category_counts = df["category"].value_counts()
+top_category = category_counts.idxmax()
+top_count = category_counts.max()
+
+print(f"\nMost stories in: {top_category} ({top_count} stories)")
+
+# Most commented story
+max_comments_row = df.loc[df["num_comments"].idxmax()]
+
+print(f"\nMost commented story: \"{max_comments_row['title']}\" — {max_comments_row['num_comments']} comments")
+
+# -----------------------------
+# Step 3: Add New Columns
+# -----------------------------
+
+# Engagement = comments / (score + 1)
+df["engagement"] = df["num_comments"] / (df["score"] + 1)
+
+# Popular if score > average score
+df["is_popular"] = df["score"] > avg_score
+
+# -----------------------------
+# Step 4: Save Updated Data
+# -----------------------------
+
+output_path = "data/trends_analysed.csv"
+
+df.to_csv(output_path, index=False)
+
+print(f"\nSaved to {output_path}")
